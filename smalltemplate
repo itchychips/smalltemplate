@@ -1,0 +1,25 @@
+#!/usr/bin/env lua
+
+local smalltemplate = require("smalltemplate")
+
+local args = {...}
+local input_path = args[1]
+local allow_lua_evaluation = args[2] or false
+if allow_lua_evaluation then
+    if allow_lua_evaluation == "true" then
+        allow_lua_evaluation = true
+    elseif allow_lua_evaluation == "false" then
+        allow_lua_evaluation = false
+    else
+        error("unexpected value for allow_lua_evaluation: " .. allow_lua_evaluation)
+    end
+end
+io.stderr:write("(stderr) Templating " .. input_path .. ".  Allowing lua evaluation in template: " .. tostring(allow_lua_evaluation) .. "\n")
+io.stderr:flush()
+
+local output,count = smalltemplate.template(input_path, allow_lua_evaluation)
+io.stdout:write(output .. "\n")
+io.stdout:flush()
+
+io.stderr:write("(stderr) Templated " .. input_path .. " with " .. count .. " substitutions.\n")
+io.stderr:flush()
