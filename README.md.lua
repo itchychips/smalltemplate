@@ -53,6 +53,14 @@ Please note that this is not fully sandboxed, as an attacker could change those
 modules and affect the outside content.  I do not recommend exposing such
 functionality against a publicly-facing endpoint at this time.
 
+# Escaping the `${}`
+
+To print a literal ${} in the template, simply use this construct:
+
+    ${}{}
+
+Hacky, but it works, and doesn't complicate the very naive gsub matcher.
+
 # Undefined variables
 
 If at any point that an undefined variable is referenced, the script will
