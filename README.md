@@ -4,6 +4,10 @@ This is a Lua program and module that allows quick and easy templating.
 
 This was written against luajit and tested against luajit and lua-5.1.
 
+# License
+
+Please see LICENSE.txt.  This is AGPL.
+
 # How to use
 
 Define your template in a lua script.  This script must return one or two
