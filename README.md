@@ -47,11 +47,14 @@ Please note that this is not fully sandboxed, as an attacker could change those
 modules and affect the outside content.  I do not recommend exposing such
 functionality against a publicly-facing endpoint at this time.
 
-# Escaping the `$`
+# Escaping the `$` before `{`
 
 To print a literal $ in the template, simply use this construct:
 
     ${}
+
+The escape is only needed if the character after `$` is a `{`.  However, the
+template function will naively replace all instances of `${}` with `$`.
 
 Hacky, but it works, and doesn't complicate the very naive gsub matcher.
 
@@ -80,6 +83,68 @@ If we fix this issue, here is what results:
 	'my value is here, but notice the lack of capital V for the variable name'
 
 	(stderr) Templated my_error_template_fixed.txt.lua with 1 substitutions.
+
+# luajit issues when running with MSYS-MinGW
+
+In MSYS-MinGW64, /usr/bin/luajit is a script with the following:
+
+    $ cat /mingw64/bin/luajit
+    #!/usr/bin/env bash
+    /usr/bin/winpty "$( dirname ${BASH_SOURCE[0]} )/luajit.exe" "$@"
+
+This means luajit will run using winpty, which if stdout or stderr is
+redirected, it will fail to run with the following message:
+
+    stdout is not a tty
+
+There are two things you can do.
+
+## Quick local fix
+
+The quick an easy way is to change the line
+at the top of `smalltemplate` from:
+
+    #!/usr/bin/env luajit
+
+to:
+
+    #!/usr/bin/env luajit.exe
+
+This will work, especially if you just need a local install script for your
+templating.
+
+## Fix for your user
+
+The other option is to provide an alternate script in your PATH with the
+following text:
+
+    #!/bin/sh
+
+    luajit.exe "$@"
+
+Ensure it is executable (which in an MSYS-MinGW environment, it will
+automatically be with the shebang line).  I put my scripts in ~/bin, and ensure
+the following line is in ~/.bashrc:
+
+    export PATH="$HOME/bin:$PATH"
+
+Ensure your shell see it:
+
+    $ which luajit
+    /home/itchychips/bin/luajit
+
+If it does not, and you are on bash, run `set +h` to forget remembered paths
+for execution, and see if the script is seen.
+
+Then, you should be able to run scripts with luajit and redirect the output for
+more than just smalltemplate.
+
+## See also
+
+See these issues for the upstream MinGW-packages and winpty projects:
+
+1. https://github.com/msys2/MINGW-packages/issues/949
+2. https://github.com/rprichard/winpty/issues/73
 
 # Other things
 
